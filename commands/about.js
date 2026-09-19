@@ -24,43 +24,41 @@ module.exports = {
     .setDescription('Menampilkan informasi lengkap tentang bot ini'),
 
   async execute(interaction) {
+    await interaction.deferReply();
+
     const client = interaction.client;
     const owner = await client.users.fetch(OWNER_ID).catch(() => null);
 
     const uptime = formatUptime(client.uptime);
-    const memoryUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const serverCount = client.guilds.cache.size;
     const commandCount = client.commands.size;
     const apiPing = Math.round(client.ws.ping);
 
     const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
+      .setColor(0x2b2d31)
       .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
-      .setTitle('🤖 Tentang Bot Ini')
       .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
-      .setDescription('Bot Discord multifungsi — command fun, moderasi, dan welcome message.')
-      .addFields(
-        { name: '📦 Versi Bot', value: `v${BOT_VERSION}`, inline: true },
-        { name: '⚙️ discord.js', value: `v${djsVersion}`, inline: true },
-        { name: '🟢 Node.js', value: process.version, inline: true },
-        { name: '👑 Owner', value: owner ? `${owner.username}` : 'Tidak diketahui', inline: true },
-        { name: '📡 Ping API', value: `${apiPing}ms`, inline: true },
-        { name: '⏱️ Uptime', value: uptime, inline: true },
-        { name: '🖥️ Server Terpasang', value: `${serverCount}`, inline: true },
-        { name: '📜 Total Command', value: `${commandCount}`, inline: true },
-        { name: '💾 Memori Terpakai', value: `${memoryUsage} MB`, inline: true }
+      .setDescription(
+        [
+          'Bot Discord multifungsi untuk fun, moderasi, dan welcome message.',
+          '',
+          `Versi ${BOT_VERSION} • Ping ${apiPing}ms • Uptime ${uptime}`,
+          `Server ${serverCount} • Command ${commandCount}`,
+        ].join('\n')
       )
-      .setFooter({ text: `Diminta oleh ${interaction.user.username}` })
-      .setTimestamp();
+      .setFooter({ text: `discord.js v${djsVersion} • Node ${process.version}` });
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setLabel('Chat Owner')
         .setStyle(ButtonStyle.Link)
         .setURL(`https://discord.com/users/${OWNER_ID}`)
-        .setEmoji('💬')
     );
 
-    await interaction.reply({ embeds: [embed], components: [row] });
+    await interaction.editReply({
+      content: owner ? `Owner: ${owner.username}` : null,
+      embeds: [embed],
+      components: [row],
+    });
   },
 };
