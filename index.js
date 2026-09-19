@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, MessageFlags } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, MessageFlags, EmbedBuilder } = require('discord.js');
 
 const { DISCORD_TOKEN } = process.env;
 
@@ -11,7 +11,7 @@ if (!DISCORD_TOKEN) {
 }
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 client.commands = new Collection();
@@ -36,6 +36,29 @@ client.once('clientReady', () => {
     activities: [{ name: '/help', type: 3 }],
     status: 'online',
   });
+});
+
+client.on('guildMemberAdd', async (member) => {
+  try {
+    let channel = member.guild.channels.cache.find(
+      (ch) => ch.isTextBased() && ['welcome', 'selamat-datang', 'welcome-member'].includes(ch.name)
+    );
+
+    if (!channel) channel = member.guild.systemChannel;
+    if (!channel) return;
+
+    const embed = new EmbedBuilder()
+      .setColor(0x57f287)
+      .setTitle('👋 Selamat Datang!')
+      .setDescription(`Halo ${member}, selamat datang di **${member.guild.name}**!`)
+      .setThumbnail(member.user.displayAvatarURL({ size: 256 }))
+      .addFields({ name: 'Member ke-', value: `${member.guild.memberCount}`, inline: true })
+      .setTimestamp();
+
+    await channel.send({ embeds: [embed] });
+  } catch (error) {
+    console.error('❌ Gagal mengirim welcome message:', error.message || error);
+  }
 });
 
 client.on('interactionCreate', async (interaction) => {
