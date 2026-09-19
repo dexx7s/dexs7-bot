@@ -11,6 +11,7 @@ const BOT_VERSION = "1.1.0";
 const OWNER_ID = "1115605327371575306";
 const OWNER_TEXT = "nzm.g0ne/dex7s";
 const OWNER_DISCORD = "dexx7s";
+const BANNER_URL = "https://i.imgur.com/7SiBqJJ.png";
 
 function formatUptime(ms) {
   const sec = Math.floor(ms / 1000) % 60;
@@ -50,13 +51,18 @@ module.exports = {
       .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
       .setDescription("Discord utility bot for moderation, automation, and server management.")
       .addFields(
-        { name: "Version", value: BOT_VERSION, inline: true },
-        { name: "Ping", value: `${ping}ms`, inline: true },
-        { name: "Uptime", value: formatUptime(client.uptime), inline: true },
-        { name: "Servers", value: `${client.guilds.cache.size}`, inline: true },
-        { name: "Commands", value: `${client.commands.size}`, inline: true },
-        { name: "Owner", value: OWNER_TEXT, inline: true }
+        {
+          name: "Overview",
+          value: `Version ${BOT_VERSION} · Ping ${ping}ms · Uptime ${formatUptime(client.uptime)}\nServers ${client.guilds.cache.size} · Commands ${client.commands.size}`,
+          inline: false,
+        },
+        {
+          name: "Owner",
+          value: `${OWNER_TEXT} (${OWNER_DISCORD})`,
+          inline: false,
+        }
       )
+      .setImage(BANNER_URL)
       .setFooter({
         text: `discord.js v${djsVersion} • Node ${process.version}`,
         iconURL: client.user.displayAvatarURL(),
@@ -70,7 +76,6 @@ module.exports = {
     );
 
     await interaction.editReply({
-      content: `Owner: ${OWNER_DISCORD}`,
       embeds: [embed],
       components: [buttons],
     });
