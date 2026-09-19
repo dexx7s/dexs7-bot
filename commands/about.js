@@ -42,33 +42,23 @@ module.exports = {
     const wsPing = Math.round(client.ws.ping);
     const ping = wsPing > 0 ? wsPing : roundTripPing;
 
-    const statsBlock = [
-      `Version    ${BOT_VERSION}`,
-      `Ping       ${ping}ms`,
-      `Uptime     ${formatUptime(client.uptime)}`,
-      `Servers    ${client.guilds.cache.size}`,
-      `Commands   ${client.commands.size}`,
-    ].join("\n");
-
     const embed = new EmbedBuilder()
       .setColor("#2B2D31")
       .setAuthor({
         name: client.user.username,
         iconURL: client.user.displayAvatarURL(),
       })
-      .setThumbnail(client.user.displayAvatarURL({ size: 512 }))
-      .setImage(BANNER_URL)
-      .setDescription([
-        "Discord Utility Bot",
-        "> Handles moderation, auto responses, and a bunch of small stuff that makes running this server less annoying.",
-        "> Clean • Fast • Reliable",
-        "",
-        "```",
-        statsBlock,
-        "```",
-        `Owner   : ${OWNER_TEXT}`,
-        `Discord : ${OWNER_DISCORD}`,
-      ].join("\n"))
+      .setThumbnail(BANNER_URL)
+      .setDescription("Discord utility bot for moderation, automation, and server management.")
+      .addFields(
+        { name: "Version", value: BOT_VERSION, inline: true },
+        { name: "Servers", value: `${client.guilds.cache.size}`, inline: true },
+        { name: "Commands", value: `${client.commands.size}`, inline: true },
+        { name: "Ping", value: `${ping}ms`, inline: true },
+        { name: "Uptime", value: formatUptime(client.uptime), inline: true },
+        { name: "\u200b", value: "\u200b", inline: true },
+        { name: "Owner", value: `${OWNER_TEXT} (${OWNER_DISCORD})`, inline: false }
+      )
       .setFooter({
         text: `discord.js v${djsVersion} • Node ${process.version}`,
         iconURL: client.user.displayAvatarURL(),
