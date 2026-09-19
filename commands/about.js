@@ -10,6 +10,7 @@ const {
 const BOT_VERSION = "1.1.0";
 const OWNER_ID = "1115605327371575306";
 const OWNER_TEXT = "nzm.g0ne/dex7s";
+const OWNER_DISCORD = "dexx7s";
 const BANNER_URL = "https://i.imgur.com/7SiBqJJ.png";
 
 function formatUptime(ms) {
@@ -36,7 +37,18 @@ module.exports = {
     await interaction.deferReply();
 
     const client = interaction.client;
-    const owner = await client.users.fetch(OWNER_ID).catch(() => null);
+    const sentMsg = await interaction.fetchReply();
+    const roundTripPing = sentMsg.createdTimestamp - interaction.createdTimestamp;
+    const wsPing = Math.round(client.ws.ping);
+    const ping = wsPing > 0 ? wsPing : roundTripPing;
+
+    const statsBlock = [
+      `Version    ${BOT_VERSION}`,
+      `Ping       ${ping}ms`,
+      `Uptime     ${formatUptime(client.uptime)}`,
+      `Servers    ${client.guilds.cache.size}`,
+      `Commands   ${client.commands.size}`,
+    ].join("\n");
 
     const embed = new EmbedBuilder()
       .setColor("#2B2D31")
@@ -51,16 +63,12 @@ module.exports = {
         "> Handles moderation, auto responses, and a bunch of small stuff that makes running this server less annoying.",
         "> Clean • Fast • Reliable",
         "",
-        `✦ Version   : \`${BOT_VERSION}\``,
-        `✦ Ping      : \`${Math.round(client.ws.ping)}ms\``,
-        `✦ Uptime    : \`${formatUptime(client.uptime)}\``,
-        `✦ Servers   : \`${client.guilds.cache.size}\``,
-        `✦ Commands  : \`${client.commands.size}\``,
-        "╭────────────────────",
-        `> Owner   : ${OWNER_TEXT}`,
-        owner ? `> Discord : ${owner.tag}` : "",
-        "╰────────────────────",
-      ].filter(Boolean).join("\n"))
+        "```",
+        statsBlock,
+        "```",
+        `Owner   : ${OWNER_TEXT}`,
+        `Discord : ${OWNER_DISCORD}`,
+      ].join("\n"))
       .setFooter({
         text: `discord.js v${djsVersion} • Node ${process.version}`,
         iconURL: client.user.displayAvatarURL(),
