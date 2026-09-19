@@ -2,6 +2,8 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, MessageFlags, EmbedBuilder } = require('discord.js');
+const { getGuildSettings } = require('./data/settings');
+const { startDashboard } = require('./server');
 
 const { DISCORD_TOKEN } = process.env;
 
@@ -36,13 +38,24 @@ client.once('clientReady', () => {
     activities: [{ name: '/help', type: 3 }],
     status: 'online',
   });
+
+  startDashboard(client);
 });
 
 client.on('guildMemberAdd', async (member) => {
   try {
-    let channel = member.guild.channels.cache.find(
-      (ch) => ch.isTextBased() && ['welcome', 'selamat-datang', 'welcome-member'].includes(ch.name)
-    );
+    const settings = getGuildSettings(member.guild.id);
+    let channel = null;
+
+    if (settings.welcomeChannelId) {
+      channel = member.guild.channels.cache.get(settings.welcomeChannelId);
+    }
+
+    if (!channel) {
+      channel = member.guild.channels.cache.find(
+        (ch) => ch.isTextBased() && ['welcome', 'selamat-datang', 'welcome-member'].includes(ch.name)
+      );
+    }
 
     if (!channel) channel = member.guild.systemChannel;
     if (!channel) return;

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — DEXXS7 BOT</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <h1>DEXXS7 BOT</h1>
+      <a href="/logout" class="link">Logout</a>
+    </div>
+
+    <div id="guildList" class="card-list"></div>
+
+    <div id="settingsPanel" class="card hidden">
+      <h2 id="guildName"></h2>
+      <label for="channelSelect">Channel Welcome Message</label>
+      <select id="channelSelect"></select>
+      <button id="saveBtn" class="btn">Simpan</button>
+      <p id="statusMsg"></p>
+    </div>
+  </div>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>
