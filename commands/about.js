@@ -1,27 +1,35 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, version: djsVersion } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  version: djsVersion,
+} = require("discord.js");
 
-const BOT_VERSION = '1.1.0';
-const OWNER_ID = '1115605327371575306';
+const BOT_VERSION = "1.1.0";
+const OWNER_ID = "1115605327371575306";
+const OWNER_NAME = "nzm.g0ne/dex7s";
+const CLIENT_ID = "1199118242845827132";
 
-function formatUptime(ms) {
-  const seconds = Math.floor(ms / 1000) % 60;
-  const minutes = Math.floor(ms / (1000 * 60)) % 60;
-  const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+function uptime(ms) {
+  const d = Math.floor(ms / 86400000);
+  const h = Math.floor(ms / 3600000) % 24;
+  const m = Math.floor(ms / 60000) % 60;
+  const s = Math.floor(ms / 1000) % 60;
 
-  const parts = [];
-  if (days > 0) parts.push(`${days}h`);
-  if (hours > 0) parts.push(`${hours}j`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  parts.push(`${seconds}d`);
-
-  return parts.join(' ');
+  return [
+    d && `${d}d`,
+    h && `${h}h`,
+    m && `${m}m`,
+    `${s}s`
+  ].filter(Boolean).join(" ");
 }
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('about')
-    .setDescription('Menampilkan informasi lengkap tentang bot ini'),
+    .setName("about")
+    .setDescription("View information about this bot"),
 
   async execute(interaction) {
     await interaction.deferReply();
@@ -29,36 +37,76 @@ module.exports = {
     const client = interaction.client;
     const owner = await client.users.fetch(OWNER_ID).catch(() => null);
 
-    const uptime = formatUptime(client.uptime);
-    const serverCount = client.guilds.cache.size;
-    const commandCount = client.commands.size;
-    const apiPing = Math.round(client.ws.ping);
+    const invite =
+      `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&permissions=8&scope=bot%20applications.commands`;
 
     const embed = new EmbedBuilder()
-      .setColor(0x2b2d31)
-      .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
-      .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
+      .setColor("#5865F2")
+      .setAuthor({
+        name: `${client.user.username}`,
+        iconURL: client.user.displayAvatarURL(),
+      })
+      .setThumbnail(client.user.displayAvatarURL({ size: 512 }))
       .setDescription(
         [
-          'Bot Discord multifungsi untuk fun, moderasi, dan welcome message.',
-          '',
-          `Versi ${BOT_VERSION} • Ping ${apiPing}ms • Uptime ${uptime}`,
-          `Server ${serverCount} • Command ${commandCount}`,
-        ].join('\n')
+          "A lightweight Discord bot built for moderation, utility, automation, and community management.",
+          "",
+          "━━━━━━━━━━━━━━━━━━━━━━"
+        ].join("\n")
       )
-      .setFooter({ text: `discord.js v${djsVersion} • Node ${process.version}` });
+      .addFields(
+        {
+          name: "📦 Information",
+          value:
+`> **Version** : \`${BOT_VERSION}\`
+> **Commands** : \`${client.commands.size}\`
+> **Servers** : \`${client.guilds.cache.size}\``,
+          inline: true,
+        },
+        {
+          name: "⚡ Performance",
+          value:
+`> **Ping** : \`${Math.round(client.ws.ping)} ms\`
+> **Uptime** : \`${uptime(client.uptime)}\`
+> **Node** : \`${process.version}\``,
+          inline: true,
+        },
+        {
+          name: "👤 Developer",
+          value:
+`> **${OWNER_NAME}**
+> ${owner ? owner.tag : "Unknown"}`,
+          inline: false,
+        }
+      )
+      .setFooter({
+        text: `Powered by Dex7s • discord.js v${djsVersion}`,
+        iconURL: client.user.displayAvatarURL(),
+      })
+      .setTimestamp();
 
-    const row = new ActionRowBuilder().addComponents(
+    const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setLabel('Chat Owner')
+        .setLabel("Owner")
+        .setEmoji("👤")
         .setStyle(ButtonStyle.Link)
-        .setURL(`https://discord.com/users/${OWNER_ID}`)
+        .setURL(`https://discord.com/users/${OWNER_ID}`),
+
+      new ButtonBuilder()
+        .setLabel("Invite")
+        .setEmoji("➕")
+        .setStyle(ButtonStyle.Link)
+        .setURL(invite)
     );
 
     await interaction.editReply({
-      content: owner ? `Owner: ${owner.username}` : null,
+      content:
+`╭────────────────────────────
+> 👑 **Owner** : **${OWNER_NAME}**
+> 🤖 **Bot** : **${client.user.username}**
+╰────────────────────────────`,
       embeds: [embed],
-      components: [row],
+      components: [buttons],
     });
   },
 };
