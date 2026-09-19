@@ -1,74 +1,82 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  version: djsVersion,
+} = require("discord.js");
 
-const VERSION = "1.1.0";
-const OWNER = "nzm.g0ne/dex7s";
+const BOT_VERSION = "1.1.0";
 const OWNER_ID = "1115605327371575306";
-const CLIENT_ID = "1199118242845827132";
+const OWNER_TEXT = "nzm.g0ne/dex7s";
+const BANNER_URL = "https://i.imgur.com/7SiBqJJ.png";
+
+function formatUptime(ms) {
+  const sec = Math.floor(ms / 1000) % 60;
+  const min = Math.floor(ms / 60000) % 60;
+  const hour = Math.floor(ms / 3600000) % 24;
+  const day = Math.floor(ms / 86400000);
+
+  const arr = [];
+  if (day) arr.push(`${day}d`);
+  if (hour) arr.push(`${hour}h`);
+  if (min) arr.push(`${min}m`);
+  arr.push(`${sec}s`);
+
+  return arr.join(" ");
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("about")
-    .setDescription("Informasi mengenai bot."),
+    .setDescription("Information about this bot"),
 
   async execute(interaction) {
-    const c = interaction.client;
+    await interaction.deferReply();
+
+    const client = interaction.client;
+    const owner = await client.users.fetch(OWNER_ID).catch(() => null);
 
     const embed = new EmbedBuilder()
-      .setColor("#5865F2")
+      .setColor("#2B2D31")
       .setAuthor({
-        name: "DEXS-S7 BOT",
-        iconURL: c.user.displayAvatarURL()
+        name: client.user.username,
+        iconURL: client.user.displayAvatarURL(),
       })
-      .setDescription(
-`Bot utilitas Discord yang dibuat untuk membantu pengelolaan server dengan fitur yang ringan dan mudah digunakan.`)
-      .addFields(
-        {
-          name: "Information",
-          value:
-`Version
-\`${VERSION}\`
-
-Commands
-\`${c.commands.size}\`
-
-Servers
-\`${c.guilds.cache.size}\``,
-          inline: true
-        },
-        {
-          name: "Status",
-          value:
-`Ping
-\`${Math.round(c.ws.ping)} ms\`
-
-Node
-\`${process.version}\`
-
-Developer
-\`${OWNER}\``,
-          inline: true
-        }
-      )
+      .setThumbnail(client.user.displayAvatarURL({ size: 512 }))
+      .setImage(BANNER_URL)
+      .setDescription([
+        "Discord Utility Bot",
+        "> Handles moderation, auto responses, and a bunch of small stuff that makes running this server less annoying.",
+        "> Clean • Fast • Reliable",
+        "",
+        `✦ Version   : \`${BOT_VERSION}\``,
+        `✦ Ping      : \`${Math.round(client.ws.ping)}ms\``,
+        `✦ Uptime    : \`${formatUptime(client.uptime)}\``,
+        `✦ Servers   : \`${client.guilds.cache.size}\``,
+        `✦ Commands  : \`${client.commands.size}\``,
+        "╭────────────────────",
+        `> Owner   : ${OWNER_TEXT}`,
+        owner ? `> Discord : ${owner.tag}` : "",
+        "╰────────────────────",
+      ].filter(Boolean).join("\n"))
       .setFooter({
-        text: "Powered by Dex7s"
+        text: `discord.js v${djsVersion} • Node ${process.version}`,
+        iconURL: client.user.displayAvatarURL(),
       })
       .setTimestamp();
 
-    const row = new ActionRowBuilder().addComponents(
+    const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setLabel("Owner")
         .setStyle(ButtonStyle.Link)
-        .setURL(`https://discord.com/users/${OWNER_ID}`),
-
-      new ButtonBuilder()
-        .setLabel("Invite")
-        .setStyle(ButtonStyle.Link)
-        .setURL(`https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&permissions=8&scope=bot%20applications.commands`)
+        .setURL(`https://discord.com/users/${OWNER_ID}`)
     );
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
-      components: [row]
+      components: [buttons],
     });
-  }
+  },
 };
